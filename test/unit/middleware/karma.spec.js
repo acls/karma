@@ -214,6 +214,21 @@ describe('middleware.karma', () => {
     callHandlerWith('/__karma__/context.html')
   })
 
+  it('should serve context.html with yarn 2 virtual package paths', (done) => {
+    includedFiles([
+      new MockFile('/.yarn/$$virtual/first.js', 'sha123'),
+      new MockFile('/.yarn/$$virtual/second.dart', 'sha456')
+    ])
+
+    response.once('end', () => {
+      expect(nextSpy).not.to.have.been.called
+      expect(response).to.beServedAs(200, 'CONTEXT\n<script type="text/javascript" src="/__proxy__/__karma__/absolute/.yarn/$$virtual/first.js?sha123" crossorigin="anonymous"></script>\n<script type="application/dart" src="/__proxy__/__karma__/absolute/.yarn/$$virtual/second.dart?sha456" crossorigin="anonymous"></script>')
+      done()
+    })
+
+    callHandlerWith('/__karma__/context.html')
+  })
+
   it('should serve context.html with replaced link tags', (done) => {
     includedFiles([
       new MockFile('/first.css', 'sha007'),
